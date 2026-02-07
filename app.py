@@ -1,21 +1,19 @@
 import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
-from rembg import remove
 import io
 
 st.set_page_config(page_title="LINE Sticker Maker", layout="wide")
 
 st.title("🎨 AI LINE Sticker Maker")
-st.write("อัปโหลดรูป -> ลบพื้นหลัง -> ใส่ข้อความ -> ใช้งานได้เลย!")
+st.write("อัปโหลดรูป -> ใส่ข้อความ -> ใช้งานได้เลย!")
 
 with st.sidebar:
     st.header("⚙️ ตั้งค่าสติกเกอร์")
     uploaded_files = st.file_uploader("1. อัปโหลดรูป", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
     sticker_text = st.text_input("2. ข้อความ", "สวัสดี")
     mood = st.selectbox("3. โทนอารมณ์", ["สดใส (ชมพู)", "ดุดัน (แดง)", "สุขุม (น้ำเงิน)", "กวนๆ (เหลือง)"])
-    remove_bg = st.checkbox("4. ลบพื้นหลังอัตโนมัติ", value=True)
-    count_option = st.selectbox("5. จำนวนรูปที่ต้องการ", [1, 8, 16, 24, 32, 40])
-    show_text = st.checkbox("6. แสดงข้อความบนสติกเกอร์", value=True)
+    count_option = st.selectbox("4. จำนวนรูปที่ต้องการ", [1, 8, 16, 24, 32, 40])
+    show_text = st.checkbox("5. แสดงข้อความบนสติกเกอร์", value=True)
     text_size = st.slider("ขนาดตัวอักษร", 20, 60, 40)
 
 mood_colors = {
@@ -50,15 +48,15 @@ if st.button("🚀 เริ่มสร้างสติกเกอร์"):
         cols = st.columns(3)
         for i in range(min(len(uploaded_files), count_option)):
             img = Image.open(uploaded_files[i]).convert("RGBA")
-            if remove_bg:
-                with st.spinner(f'กำลังลบพื้นหลังรูปที่ {i+1}...'):
-                    img = remove(img)
+            
             img.thumbnail((370, 320))
             canvas = Image.new("RGBA", (370, 320), (255, 255, 255, 0))
             offset = ((370 - img.width) // 2, (320 - img.height) // 2)
             canvas.paste(img, offset, img)
+            
             if show_text and sticker_text:
                 canvas = add_text_to_image(canvas, sticker_text, selected_color, text_size)
+            
             with cols[i % 3]:
                 st.image(canvas)
                 buf = io.BytesIO()
